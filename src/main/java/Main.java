@@ -25,7 +25,7 @@ public class Main {
             System.out.println("accepted new connection");
             String url = parseUrl(clientSocket);
             String answer = null;
-            if (url.equals("index.html"))
+            if (url.isEmpty())
                 answer = SUCCESS;
             else
                 answer = NOT_FOUND;
