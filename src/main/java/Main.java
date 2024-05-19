@@ -43,6 +43,6 @@ public class Main {
                         .collect(Collectors.joining("\n"));
         int urlIndex = s.indexOf("/");
         int httpIndex = s.indexOf("HTTP");
-        return s.substring(urlIndex + 1, httpIndex);
+        return s.substring(urlIndex + 1, httpIndex - 1);
     }
 }
