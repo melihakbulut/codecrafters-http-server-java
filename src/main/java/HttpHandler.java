@@ -15,10 +15,10 @@ public class HttpHandler {
             answer = SUCCESS;
         else if (httpRequest.getEndpoint().startsWith("echo")) {
             String value = httpRequest.getEndpoint().replaceAll("echo/", "");
-            answer = sendEcho(value);
-        }
-
-        else
+            answer = prepareSuccessResponse(value);
+        } else if (httpRequest.getEndpoint().equals("user-agent")) {
+            answer = prepareSuccessResponse(httpRequest.getHeaders().get("User-Agent"));
+        } else
             answer = NOT_FOUND;
         answer += NEW_LINE;
         System.out.println(answer);
@@ -27,12 +27,12 @@ public class HttpHandler {
         Thread.sleep(10);
     }
 
-    public String sendEcho(String value) {
+    public String prepareSuccessResponse(String body) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SUCCESS);
         stringBuilder.append("Content-Type: text/plain" + NEW_LINE);
-        stringBuilder.append(String.format("Content-Length: %s%s%s%s", value.length(), NEW_LINE,
-                                           NEW_LINE, value));
+        stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
+                                           NEW_LINE, body));
         return stringBuilder.toString();
     }
 }

@@ -25,23 +25,19 @@ public class HttpParser {
             index++;
         }
         String payload = new String(buf, StandardCharsets.UTF_8);
-        String endpoint = parseEndpoint(payload);
-        String body = parseBody(payload);
-        return new HttpRequest(endpoint, null, body);
+        return parseHttpRequest(payload);
     }
 
-    private static String parseBody(String payload) {
-        Integer contentSize = null;
+    private static HttpRequest parseHttpRequest(String payload) {
+        HttpRequest httpRequest = new HttpRequest();
+        httpRequest.setEndpoint(parseEndpoint(payload));
         String[] payloadArr = payload.split("\r\n");
         for (String payloadItem : payloadArr) {
-            if (payloadItem.startsWith("Content-Length")) {
-                contentSize = Integer.parseInt(payloadItem.split(":")[1].trim());
-            }
+            String[] payloadItemArr = payloadItem.split(":");
+            if (payloadItemArr.length == 2 && !payloadItemArr[0].isEmpty())
+                httpRequest.getHeaders().put(payloadItemArr[0].trim(), payloadItemArr[1].trim());
         }
-
-        payloadArr[payloadArr.length - 1].length();
-
-        return null;
+        return httpRequest;
     }
 
     private static String parseEndpoint(String payload) {
