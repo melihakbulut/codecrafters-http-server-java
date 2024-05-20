@@ -31,12 +31,14 @@ public class HttpParser {
     private static HttpRequest parseHttpRequest(String payload) {
         HttpRequest httpRequest = new HttpRequest();
         httpRequest.setEndpoint(parseEndpoint(payload));
+        httpRequest.setHttpMethod(parseHttpMethod(payload));
         String[] payloadArr = payload.split("\r\n");
         for (String payloadItem : payloadArr) {
             String[] payloadItemArr = payloadItem.split(":");
             if (payloadItemArr.length == 2 && !payloadItemArr[0].isEmpty())
                 httpRequest.getHeaders().put(payloadItemArr[0].trim(), payloadItemArr[1].trim());
         }
+        httpRequest.setBody(payloadArr[payloadArr.length - 1]);
         return httpRequest;
     }
 
@@ -44,5 +46,10 @@ public class HttpParser {
         int urlIndex = payload.indexOf("/");
         int httpIndex = payload.indexOf("HTTP");
         return payload.substring(urlIndex + 1, httpIndex - 1);
+    }
+
+    private static String parseHttpMethod(String payload) {
+        int firstSpaceIndex = payload.indexOf(" ");
+        return payload.substring(0, firstSpaceIndex);
     }
 }

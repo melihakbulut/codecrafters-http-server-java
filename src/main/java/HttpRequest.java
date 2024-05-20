@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class HttpRequest {
 
+    private String httpMethod;
     private String endpoint;
     private Map<String, String> headers = new HashMap<String, String>();
     private String body;

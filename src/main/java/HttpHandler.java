@@ -40,14 +40,23 @@ public class HttpHandler implements Runnable {
             answer = sendSuccessResponse(httpRequest.getHeaders().get("User-Agent"));
         } else if (httpRequest.getEndpoint().startsWith("files")) {
             String fileName = httpRequest.getEndpoint().replaceAll("files/", "");
-            sendFile(fileName);
-            return;
+            if (httpRequest.getHttpMethod().equals("GET")) {
+                sendFile(fileName);
+                return;
+            } else if (httpRequest.getHttpMethod().equals("POST")) {
+                saveFile(httpRequest, fileName);
+                return;
+            }
         } else
             answer = NOT_FOUND;
         answer += NEW_LINE;
         System.out.println(answer);
         System.out.println("sad");
         clientSocket.getOutputStream().write(answer.getBytes());
+    }
+
+    private void saveFile(HttpRequest httpRequest, String fileName) throws IOException {
+        Files.write(Path.of(baseDir + "/" + fileName), httpRequest.getBody().getBytes(), null);
     }
 
     public String sendSuccessResponse(String body) {
