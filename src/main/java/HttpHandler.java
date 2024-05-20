@@ -21,6 +21,7 @@ public class HttpHandler {
         else
             answer = NOT_FOUND;
         System.out.println(answer);
+        System.out.println("sad");
         clientSocket.getOutputStream().write(answer.getBytes());
         Thread.sleep(10);
     }
@@ -29,8 +30,8 @@ public class HttpHandler {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SUCCESS);
         stringBuilder.append("Content-Type: text/plain" + NEW_LINE);
-        stringBuilder.append(String.format("Content-Length: %s%s%s%s", value.length(), NEW_LINE,
-                                           value, NEW_LINE));
+        stringBuilder.append(String.format("Content-Length: %s%s%s%s%s", value.length(), NEW_LINE,
+                                           NEW_LINE, value, NEW_LINE));
         return stringBuilder.toString();
     }
 }
