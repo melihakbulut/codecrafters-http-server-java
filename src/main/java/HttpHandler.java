@@ -1,5 +1,8 @@
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class HttpHandler implements Runnable {
 
@@ -9,9 +12,11 @@ public class HttpHandler implements Runnable {
     public static final String NOT_FOUND = "HTTP/1.1 404 Not Found" + NEW_LINE;
 
     private Socket clientSocket;
+    private String baseDir;
 
-    public HttpHandler(Socket clientSocket) {
+    public HttpHandler(Socket clientSocket, String baseDir) {
         this.clientSocket = clientSocket;
+        this.baseDir = baseDir;
     }
 
     @Override
@@ -30,9 +35,12 @@ public class HttpHandler implements Runnable {
             answer = SUCCESS;
         else if (httpRequest.getEndpoint().startsWith("echo")) {
             String value = httpRequest.getEndpoint().replaceAll("echo/", "");
-            answer = prepareSuccessResponse(value);
+            answer = sendSuccessResponse(value);
         } else if (httpRequest.getEndpoint().equals("user-agent")) {
-            answer = prepareSuccessResponse(httpRequest.getHeaders().get("User-Agent"));
+            answer = sendSuccessResponse(httpRequest.getHeaders().get("User-Agent"));
+        } else if (httpRequest.getEndpoint().startsWith("files")) {
+            String fileName = httpRequest.getEndpoint().replaceAll("files/", "");
+            answer = sendFile(fileName);
         } else
             answer = NOT_FOUND;
         answer += NEW_LINE;
@@ -42,12 +50,23 @@ public class HttpHandler implements Runnable {
         Thread.sleep(10);
     }
 
-    public String prepareSuccessResponse(String body) {
+    public String sendSuccessResponse(String body) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SUCCESS);
         stringBuilder.append("Content-Type: text/plain" + NEW_LINE);
         stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
                                            NEW_LINE, body));
+        return stringBuilder.toString();
+    }
+
+    public String sendFile(String fileName) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(SUCCESS);
+        stringBuilder.append("Content-Type: application/octet-stream" + NEW_LINE);
+        byte[] content = Files.readAllBytes(Path.of(URI.create(baseDir + "/" + fileName)));
+
+        stringBuilder.append(String.format("Content-Length: %s%s%s%s", content.length, NEW_LINE,
+                                           NEW_LINE, content));
         return stringBuilder.toString();
     }
 

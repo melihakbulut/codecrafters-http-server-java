@@ -1,14 +1,20 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 
 public class Main {
 
     public static void main(String[] args) throws InterruptedException {
         // You can use print statements as follows for debugging, they'll be visible when running tests.
         System.out.println("Logs from your program will appear here!");
-        System.out.println(Arrays.toString(args));
+        String baseDir = null;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("--directory")) {
+                baseDir = args[i + 1];
+                break;
+            }
+
+        }
         //     Uncomment this block to pass the first stage
 
         ServerSocket serverSocket = null;
@@ -20,7 +26,7 @@ public class Main {
             while (true) {
                 clientSocket = serverSocket.accept(); // Wait for connection from client.
                 System.out.println("accepted new connection");
-                new Thread(new HttpHandler(clientSocket)).start();
+                new Thread(new HttpHandler(clientSocket, baseDir)).start();
             }
 
         } catch (IOException e) {
