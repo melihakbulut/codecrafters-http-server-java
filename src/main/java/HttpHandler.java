@@ -57,7 +57,7 @@ public class HttpHandler implements Runnable {
     }
 
     private void saveFile(HttpRequest httpRequest, String fileName) throws IOException {
-        Path.of(baseDir + "/" + fileName).toFile().mkdir();
+        Path.of(baseDir + "/" + fileName).toFile().createNewFile();
         Files.write(Path.of(baseDir + "/" + fileName), httpRequest.getBody().getBytes(),
                     StandardOpenOption.WRITE);
     }
