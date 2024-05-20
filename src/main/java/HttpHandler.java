@@ -40,7 +40,8 @@ public class HttpHandler implements Runnable {
             answer = sendSuccessResponse(httpRequest.getHeaders().get("User-Agent"));
         } else if (httpRequest.getEndpoint().startsWith("files")) {
             String fileName = httpRequest.getEndpoint().replaceAll("files/", "");
-            answer = sendFile(fileName);
+            sendFile(fileName);
+            return;
         } else
             answer = NOT_FOUND;
         answer += NEW_LINE;
@@ -58,7 +59,7 @@ public class HttpHandler implements Runnable {
         return stringBuilder.toString();
     }
 
-    public String sendFile(String fileName) throws IOException {
+    public void sendFile(String fileName) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SUCCESS);
         stringBuilder.append("Content-Type: application/octet-stream" + NEW_LINE);
@@ -66,12 +67,15 @@ public class HttpHandler implements Runnable {
         try {
             content = Files.readAllBytes(Path.of(baseDir + "/" + fileName));
         } catch (NoSuchFileException e) {
-            return NOT_FOUND;
+            stringBuilder = new StringBuilder(NOT_FOUND);
         }
 
-        stringBuilder.append(String.format("Content-Length: %s%s%s%s", content.length, NEW_LINE,
-                                           NEW_LINE, content));
-        return stringBuilder.toString();
+        stringBuilder.append(String.format("Content-Length: %s%s%s", content.length, NEW_LINE,
+                                           NEW_LINE));
+        stringBuilder.toString();
+
+        clientSocket.getOutputStream().write(stringBuilder.toString().getBytes());
+        clientSocket.getOutputStream().write(content);
     }
 
 }
