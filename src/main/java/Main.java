@@ -18,7 +18,8 @@ public class Main {
             serverSocket.setReuseAddress(true);
             clientSocket = serverSocket.accept(); // Wait for connection from client.
             System.out.println("accepted new connection");
-            new HttpHandler().handle(clientSocket);
+            new Thread(new HttpHandler(clientSocket)).start();
+
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
         }
