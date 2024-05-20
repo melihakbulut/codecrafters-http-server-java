@@ -67,8 +67,7 @@ public class HttpHandler implements Runnable {
         try {
             content = Files.readAllBytes(Path.of(baseDir + "/" + fileName));
         } catch (NoSuchFileException e) {
-            stringBuilder = new StringBuilder(NOT_FOUND);
-            clientSocket.getOutputStream().write(stringBuilder.toString().getBytes());
+            clientSocket.getOutputStream().write((NOT_FOUND + NEW_LINE).getBytes());
             return;
         }
 
