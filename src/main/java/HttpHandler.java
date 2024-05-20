@@ -1,7 +1,7 @@
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
 public class HttpHandler implements Runnable {
@@ -47,7 +47,6 @@ public class HttpHandler implements Runnable {
         System.out.println(answer);
         System.out.println("sad");
         clientSocket.getOutputStream().write(answer.getBytes());
-        Thread.sleep(10);
     }
 
     public String sendSuccessResponse(String body) {
@@ -63,7 +62,12 @@ public class HttpHandler implements Runnable {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SUCCESS);
         stringBuilder.append("Content-Type: application/octet-stream" + NEW_LINE);
-        byte[] content = Files.readAllBytes(Path.of(URI.create(baseDir + "/" + fileName)));
+        byte[] content = null;
+        try {
+            content = Files.readAllBytes(Path.of(baseDir + "/" + fileName));
+        } catch (NoSuchFileException e) {
+            return NOT_FOUND;
+        }
 
         stringBuilder.append(String.format("Content-Length: %s%s%s%s", content.length, NEW_LINE,
                                            NEW_LINE, content));
