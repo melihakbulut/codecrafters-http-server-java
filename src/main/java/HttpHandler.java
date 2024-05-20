@@ -3,6 +3,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 public class HttpHandler implements Runnable {
 
@@ -56,7 +57,9 @@ public class HttpHandler implements Runnable {
     }
 
     private void saveFile(HttpRequest httpRequest, String fileName) throws IOException {
-        Files.write(Path.of(baseDir + "/" + fileName), httpRequest.getBody().getBytes(), null);
+        Path.of(baseDir + "/" + fileName).toFile().mkdir();
+        Files.write(Path.of(baseDir + "/" + fileName), httpRequest.getBody().getBytes(),
+                    StandardOpenOption.WRITE);
     }
 
     public String sendSuccessResponse(String body) {
