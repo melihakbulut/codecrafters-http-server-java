@@ -1,10 +1,14 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.zip.GZIPOutputStream;
 
 public class HttpHandler implements Runnable {
 
@@ -67,7 +71,7 @@ public class HttpHandler implements Runnable {
         sendResponse(CREATED);
     }
 
-    public String sendSuccessResponse(String body, HttpRequest httpRequest) {
+    public String sendSuccessResponse(String body, HttpRequest httpRequest) throws IOException {
         System.out.println(body);
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SUCCESS);
@@ -75,13 +79,35 @@ public class HttpHandler implements Runnable {
         if (httpRequest.getHeaders().get("Accept-Encoding") != null
             && httpRequest.getHeaders().get("Accept-Encoding").contains("gzip")) {
             stringBuilder.append("Content-Encoding: gzip" + NEW_LINE);
-            body = new String(new BigInteger("1f8b08008c643b6602ff4bcbcf07002165738c03000000", 16)
-                            .toByteArray());
+            body = compressString(body);
         }
 
         stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
                                            NEW_LINE, body));
         return stringBuilder.toString();
+    }
+
+    public static String compressString(String str) throws IOException {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        BufferedWriter writer = null;
+        String body = null;
+        try {
+            File file = new File("your.gzip");
+            GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(file));
+
+            writer = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));
+
+            writer.append(str);
+            body = new String(Files.readAllBytes(Path.of(file.getAbsolutePath())));
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+        }
+        return body;
     }
 
     public void sendFile(String fileName) throws IOException {
