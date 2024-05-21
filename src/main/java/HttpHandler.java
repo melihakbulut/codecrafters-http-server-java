@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -66,20 +67,25 @@ public class HttpHandler implements Runnable {
         sendResponse(CREATED);
     }
 
-    public String sendSuccessResponse(String body, HttpRequest httpRequest) {
-        int length = body.length();
+    public String sendSuccessResponse(String body, HttpRequest httpRequest) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SUCCESS);
         stringBuilder.append("Content-Type: text/plain" + NEW_LINE);
         if (httpRequest.getHeaders().get("Accept-Encoding") != null
             && httpRequest.getHeaders().get("Accept-Encoding").contains("gzip")) {
             stringBuilder.append("Content-Encoding: gzip" + NEW_LINE);
-            body = "1f8b08008c643b6602ff4bcbcf07002165738c03000000";
-            length = body.length() / 2;
-        }
+            byte[] bodyArr = new BigInteger("1f8b08008c643b6602ff4bcbcf07002165738c03000000", 16)
+                            .toByteArray();
+            stringBuilder.append(String.format("Content-Length: %s%s%s", body.length(), NEW_LINE,
+                                               NEW_LINE));
+            sendResponse(stringBuilder.toString());
+            sendResponse(bodyArr);
+            return null;
 
-        stringBuilder.append(String.format("Content-Length: %s%s%s%s", length, NEW_LINE, NEW_LINE,
-                                           body));
+        } else {
+            stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
+                                               NEW_LINE, body));
+        }
         return stringBuilder.toString();
     }
 
@@ -103,8 +109,10 @@ public class HttpHandler implements Runnable {
     }
 
     public void sendResponse(String response) throws IOException {
-        response += NEW_LINE;
-        sendResponse(response.getBytes());
+        if (response != null) {
+            response += NEW_LINE;
+            sendResponse(response.getBytes());
+        }
     }
 
     public void sendResponse(byte[] message) throws IOException {
