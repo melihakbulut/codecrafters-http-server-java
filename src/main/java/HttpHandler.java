@@ -78,7 +78,7 @@ public class HttpHandler implements Runnable {
             stringBuilder.append("Content-Encoding: gzip" + NEW_LINE);
             body = new String(compressResponse(body.getBytes()));
             stringBuilder.append(String.format("Content-Length: %s", body.length()));
-            sendResponse(stringBuilder.toString());
+            stringBuilder.append(body);
             sendResponse(body);
             return null;
 
