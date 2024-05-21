@@ -72,8 +72,7 @@ public class HttpHandler implements Runnable {
         stringBuilder.append("Content-Type: text/plain" + NEW_LINE);
         if (httpRequest.getHeaders().get("Accept-Encoding") != null
             && httpRequest.getHeaders().get("Accept-Encoding").contains("gzip"))
-            stringBuilder.append("Content-Encoding: "
-                                 + httpRequest.getHeaders().get("Accept-Encoding") + NEW_LINE);
+            stringBuilder.append("Content-Encoding: gzip" + NEW_LINE);
 
         stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
                                            NEW_LINE, body));
