@@ -23,10 +23,14 @@ public class Main {
         try {
             serverSocket = new ServerSocket(4221);
             serverSocket.setReuseAddress(true);
+            int index = 1;
             while (true) {
                 clientSocket = serverSocket.accept(); // Wait for connection from client.
                 System.out.println("accepted new connection");
-                new Thread(new HttpHandler(clientSocket, baseDir)).start();
+                Thread t = new Thread(new HttpHandler(clientSocket, baseDir));
+                t.setName("http-thread " + index % 15);
+                t.start();
+                index++;
             }
 
         } catch (IOException e) {

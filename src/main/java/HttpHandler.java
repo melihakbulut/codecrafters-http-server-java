@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.text.MessageFormat;
 import java.util.zip.GZIPOutputStream;
 
 public class HttpHandler implements Runnable {
@@ -40,8 +41,9 @@ public class HttpHandler implements Runnable {
         if (httpRequest.getEndpoint().isEmpty())
             sendResponse(SUCCESS);
         else if (httpRequest.getEndpoint().startsWith("echo")) {
-            String value = httpRequest.getEndpoint().replaceAll("echo/", "");
-            sendResponse(sendSuccessResponse(value, httpRequest));
+            //            String value = httpRequest.getEndpoint().replaceAll("echo/", "");
+            //            sendResponse(sendSuccessResponse(value, httpRequest));
+            sendHttpResponse(new EchoService().process(httpRequest, clientSocket));
         } else if (httpRequest.getEndpoint().equals("user-agent")) {
 
             sendResponse(sendSuccessResponse(httpRequest.getHeaders().get("User-Agent"),
@@ -58,6 +60,16 @@ public class HttpHandler implements Runnable {
         } else
             sendResponse(NOT_FOUND);
 
+    }
+
+    private void sendHttpResponse(HttpResponse httpResponse) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(HttpResponse.HTTP_PREFIX + httpResponse.getHttpStatus().getValue()
+                             + NEW_LINE);
+        httpResponse.getHeaders().forEach((k, v) -> stringBuilder
+                        .append(MessageFormat.format("{0}:{1}{2}", k, v, NEW_LINE)));
+        stringBuilder.append(NEW_LINE);
+        sendResponse(stringBuilder.toString().getBytes(), httpResponse.getBody());
     }
 
     private void saveFile(HttpRequest httpRequest, String fileName) throws IOException,
@@ -86,7 +98,6 @@ public class HttpHandler implements Runnable {
         } else {
             stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
                                                NEW_LINE, body));
-
         }
         return stringBuilder.toString();
     }
@@ -98,9 +109,7 @@ public class HttpHandler implements Runnable {
             gzip.write(fileContents);
             gzip.finish();
             return arrayOutputStream.toByteArray();
-        } catch (
-
-        IOException e) {
+        } catch (IOException e) {
             System.out.print("IOException: " + e.getMessage());
             return fileContents;
         }
@@ -134,6 +143,14 @@ public class HttpHandler implements Runnable {
 
     public void sendResponse(byte[] message) throws IOException {
         clientSocket.getOutputStream().write(message);
+        clientSocket.getOutputStream().flush();
+
+    }
+
+    public void sendResponse(byte[]... messages) throws IOException {
+        for (byte[] message : messages) {
+            clientSocket.getOutputStream().write(message);
+        }
         clientSocket.getOutputStream().flush();
 
     }
