@@ -86,6 +86,7 @@ public class HttpHandler implements Runnable {
         } else {
             stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
                                                NEW_LINE, body));
+
         }
         return stringBuilder.toString();
     }
