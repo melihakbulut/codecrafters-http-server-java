@@ -86,8 +86,7 @@ public class HttpHandler implements Runnable {
             return;
         }
 
-        stringBuilder.append(String.format("Content-Length: %s%s%s", content.length, NEW_LINE,
-                                           NEW_LINE));
+        stringBuilder.append(String.format("Content-Length: %s%s", content.length, NEW_LINE));
         stringBuilder.toString();
 
         sendResponse(stringBuilder.toString());
@@ -101,6 +100,7 @@ public class HttpHandler implements Runnable {
 
     public void sendResponse(byte[] message) throws IOException {
         clientSocket.getOutputStream().write(message);
+        clientSocket.getOutputStream().flush();
 
     }
 
