@@ -67,6 +67,7 @@ public class HttpHandler implements Runnable {
     }
 
     public String sendSuccessResponse(String body, HttpRequest httpRequest) {
+        int length = body.length();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SUCCESS);
         stringBuilder.append("Content-Type: text/plain" + NEW_LINE);
@@ -74,10 +75,11 @@ public class HttpHandler implements Runnable {
             && httpRequest.getHeaders().get("Accept-Encoding").contains("gzip")) {
             stringBuilder.append("Content-Encoding: gzip" + NEW_LINE);
             body = "1f8b08008c643b6602ff4bcbcf07002165738c03000000";
+            length = body.length() / 2;
         }
 
-        stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
-                                           NEW_LINE, body));
+        stringBuilder.append(String.format("Content-Length: %s%s%s%s", length, NEW_LINE, NEW_LINE,
+                                           body));
         return stringBuilder.toString();
     }
 
