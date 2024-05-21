@@ -3,15 +3,15 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.zip.GZIPOutputStream;
 
-public interface IService {
+public abstract class AbstractService {
 
-    HttpResponse process(HttpRequest httpRequest, Socket clientSocket);
+    abstract HttpResponse process(HttpRequest httpRequest, Socket clientSocket);
 
-    default public byte[] compressResponse(String body) {
+    protected byte[] compressResponse(String body) {
         return compressResponse(body.getBytes());
     }
 
-    default public byte[] compressResponse(byte[] fileContents) {
+    protected byte[] compressResponse(byte[] fileContents) {
         try {
             ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
             GZIPOutputStream gzip = new GZIPOutputStream(arrayOutputStream);

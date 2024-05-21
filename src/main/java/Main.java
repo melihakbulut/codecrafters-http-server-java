@@ -27,10 +27,7 @@ public class Main {
             while (true) {
                 clientSocket = serverSocket.accept(); // Wait for connection from client.
                 System.out.println("accepted new connection");
-                Thread t = new Thread(new HttpHandler(clientSocket, baseDir));
-                t.setName("http-thread " + index % 15);
-                t.start();
-                index++;
+                new Thread(new HttpHandler(clientSocket, baseDir)).start();
             }
 
         } catch (IOException e) {

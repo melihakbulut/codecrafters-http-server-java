@@ -1,7 +1,13 @@
 import java.net.Socket;
 import java.util.Objects;
 
-public class EchoService implements IService {
+public class BasicService extends AbstractService {
+
+    private String body;
+
+    public BasicService(String body) {
+        this.body = body;
+    }
 
     @Override
     public HttpResponse process(HttpRequest httpRequest, Socket clientSocket) {
@@ -9,12 +15,11 @@ public class EchoService implements IService {
         httpResponse.getHeaders().put("Content-Type", "text/plain");
         String acceptEncoding = httpRequest.getHeaders().get("Accept-Encoding");
 
-        String value = httpRequest.getEndpoint().replaceAll("echo/", "");
         if (Objects.nonNull(acceptEncoding) && acceptEncoding.contains("gzip")) {
             httpResponse.getHeaders().put("Content-Encoding", "gzip");
-            httpResponse.setBody(compressResponse(value));
+            httpResponse.setBody(compressResponse(body));
         } else {
-            httpResponse.setBody(value);
+            httpResponse.setBody(body);
         }
         httpResponse.getHeaders().put("Content-Length",
                                       String.valueOf(httpResponse.getBody().length));

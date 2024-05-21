@@ -36,18 +36,13 @@ public class HttpHandler implements Runnable {
     public void handle() throws IOException, InterruptedException {
         HttpRequest httpRequest = HttpParser.parse(clientSocket);
 
-        if (httpRequest == null)
-            return;
+        AbstractService service = null;
         if (httpRequest.getEndpoint().isEmpty())
-            sendResponse(SUCCESS);
+            sendHttpResponse(new HttpResponse(HttpStatus.SUCCESS));
         else if (httpRequest.getEndpoint().startsWith("echo")) {
-            //            String value = httpRequest.getEndpoint().replaceAll("echo/", "");
-            //            sendResponse(sendSuccessResponse(value, httpRequest));
-            sendHttpResponse(new EchoService().process(httpRequest, clientSocket));
+            service = new BasicService(httpRequest.getEndpoint().replaceAll("echo/", ""));
         } else if (httpRequest.getEndpoint().equals("user-agent")) {
-
-            sendResponse(sendSuccessResponse(httpRequest.getHeaders().get("User-Agent"),
-                                             httpRequest));
+            service = new BasicService(httpRequest.getHeaders().get("User-Agent"));
         } else if (httpRequest.getEndpoint().startsWith("files")) {
             String fileName = httpRequest.getEndpoint().replaceAll("files/", "");
             if (httpRequest.getHttpMethod().equals("GET")) {
@@ -58,7 +53,13 @@ public class HttpHandler implements Runnable {
                 return;
             }
         } else
-            sendResponse(NOT_FOUND);
+            sendHttpResponse(new HttpResponse(HttpStatus.NOT_FOUND));
+
+        sendHttpResponse(service.process(httpRequest, clientSocket));
+
+    }
+
+    private void sendBasicHttpResponse(HttpResponse httpResponse) throws IOException {
 
     }
 
