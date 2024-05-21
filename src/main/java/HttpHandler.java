@@ -32,16 +32,17 @@ public class HttpHandler implements Runnable {
 
     public void handle() throws IOException, InterruptedException {
         HttpRequest httpRequest = HttpParser.parse(clientSocket);
-        String answer = null;
+
         if (httpRequest == null)
             return;
         if (httpRequest.getEndpoint().isEmpty())
-            answer = SUCCESS;
+            sendResponse(SUCCESS);
         else if (httpRequest.getEndpoint().startsWith("echo")) {
             String value = httpRequest.getEndpoint().replaceAll("echo/", "");
-            answer = sendSuccessResponse(value);
+            sendResponse(sendSuccessResponse(value));
         } else if (httpRequest.getEndpoint().equals("user-agent")) {
-            answer = sendSuccessResponse(httpRequest.getHeaders().get("User-Agent"));
+
+            sendResponse(sendSuccessResponse(httpRequest.getHeaders().get("User-Agent")));
         } else if (httpRequest.getEndpoint().startsWith("files")) {
             String fileName = httpRequest.getEndpoint().replaceAll("files/", "");
             if (httpRequest.getHttpMethod().equals("GET")) {
@@ -52,11 +53,8 @@ public class HttpHandler implements Runnable {
                 return;
             }
         } else
-            answer = NOT_FOUND;
-        answer += NEW_LINE;
-        System.out.println(answer);
-        System.out.println("sad");
-        clientSocket.getOutputStream().write(answer.getBytes());
+            sendResponse(NOT_FOUND);
+
     }
 
     private void saveFile(HttpRequest httpRequest, String fileName) throws IOException,
@@ -64,8 +62,7 @@ public class HttpHandler implements Runnable {
         Path.of(baseDir + "/" + fileName).toFile().createNewFile();
         Files.write(Path.of(baseDir + "/" + fileName), httpRequest.getBody().getBytes(),
                     StandardOpenOption.WRITE);
-        clientSocket.getOutputStream().write(CREATED.getBytes());
-        clientSocket.getOutputStream().flush();
+        sendResponse(CREATED);
     }
 
     public String sendSuccessResponse(String body) {
@@ -85,7 +82,7 @@ public class HttpHandler implements Runnable {
         try {
             content = Files.readAllBytes(Path.of(baseDir + "/" + fileName));
         } catch (NoSuchFileException e) {
-            clientSocket.getOutputStream().write((NOT_FOUND + NEW_LINE).getBytes());
+            sendResponse(NOT_FOUND);
             return;
         }
 
@@ -93,8 +90,18 @@ public class HttpHandler implements Runnable {
                                            NEW_LINE));
         stringBuilder.toString();
 
-        clientSocket.getOutputStream().write(stringBuilder.toString().getBytes());
-        clientSocket.getOutputStream().write(content);
+        sendResponse(stringBuilder.toString());
+        sendResponse(content);
+    }
+
+    public void sendResponse(String response) throws IOException {
+        response += NEW_LINE;
+        sendResponse(response.getBytes());
+    }
+
+    public void sendResponse(byte[] message) throws IOException {
+        clientSocket.getOutputStream().write(message);
+
     }
 
 }
