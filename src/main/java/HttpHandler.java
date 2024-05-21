@@ -39,10 +39,11 @@ public class HttpHandler implements Runnable {
             sendResponse(SUCCESS);
         else if (httpRequest.getEndpoint().startsWith("echo")) {
             String value = httpRequest.getEndpoint().replaceAll("echo/", "");
-            sendResponse(sendSuccessResponse(value));
+            sendResponse(sendSuccessResponse(value, httpRequest));
         } else if (httpRequest.getEndpoint().equals("user-agent")) {
 
-            sendResponse(sendSuccessResponse(httpRequest.getHeaders().get("User-Agent")));
+            sendResponse(sendSuccessResponse(httpRequest.getHeaders().get("User-Agent"),
+                                             httpRequest));
         } else if (httpRequest.getEndpoint().startsWith("files")) {
             String fileName = httpRequest.getEndpoint().replaceAll("files/", "");
             if (httpRequest.getHttpMethod().equals("GET")) {
@@ -65,10 +66,14 @@ public class HttpHandler implements Runnable {
         sendResponse(CREATED);
     }
 
-    public String sendSuccessResponse(String body) {
+    public String sendSuccessResponse(String body, HttpRequest httpRequest) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SUCCESS);
         stringBuilder.append("Content-Type: text/plain" + NEW_LINE);
+        if (httpRequest.getHeaders().get("Accept-Encoding") != null)
+            stringBuilder.append("Content-Encoding: "
+                                 + httpRequest.getHeaders().get("Accept-Encoding") + NEW_LINE);
+
         stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
                                            NEW_LINE, body));
         return stringBuilder.toString();
