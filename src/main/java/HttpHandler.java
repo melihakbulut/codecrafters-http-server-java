@@ -1,8 +1,5 @@
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -79,7 +76,7 @@ public class HttpHandler implements Runnable {
         if (httpRequest.getHeaders().get("Accept-Encoding") != null
             && httpRequest.getHeaders().get("Accept-Encoding").contains("gzip")) {
             stringBuilder.append("Content-Encoding: gzip" + NEW_LINE);
-            body = compressString(body);
+            body = new String(compressResponse(body.getBytes()));
         }
 
         stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
@@ -87,27 +84,19 @@ public class HttpHandler implements Runnable {
         return stringBuilder.toString();
     }
 
-    public static String compressString(String str) throws IOException {
-        if (str == null || str.length() == 0) {
-            return str;
-        }
-
-        BufferedWriter writer = null;
-        String body = null;
+    private byte[] compressResponse(byte[] fileContents) {
         try {
-            File file = new File("your.gzip");
-            GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(file));
+            ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+            GZIPOutputStream gzip = new GZIPOutputStream(arrayOutputStream);
+            gzip.write(fileContents);
+            gzip.finish();
+            return arrayOutputStream.toByteArray();
+        } catch (
 
-            writer = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));
-
-            writer.append(str);
-            body = new String(Files.readAllBytes(Path.of(file.getAbsolutePath())));
-        } finally {
-            if (writer != null) {
-                writer.close();
-            }
+        IOException e) {
+            System.out.print("IOException: " + e.getMessage());
+            return fileContents;
         }
-        return body;
     }
 
     public void sendFile(String fileName) throws IOException {
