@@ -79,7 +79,7 @@ public class HttpHandler implements Runnable {
             body = new String(compressResponse(body.getBytes()));
             stringBuilder.append(String.format("Content-Length: %s%s", body.length(), NEW_LINE));
             stringBuilder.append(body);
-            sendResponse(stringBuilder.toString().getBytes());
+            sendResponse(stringBuilder.toString());
             return null;
 
         } else {
