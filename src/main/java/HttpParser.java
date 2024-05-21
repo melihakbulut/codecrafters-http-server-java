@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 public class HttpParser {
 
     public static HttpRequest parse(Socket clientSocket) throws IOException {
-        final int bufLen = 4 * 0x400; // 4KB
+        final int bufLen = 128 * 0x400; // 4KB
         byte[] buf = new byte[bufLen];
         int index = 0;
         while (true) {
@@ -24,11 +24,17 @@ public class HttpParser {
             }
             index++;
         }
-        String payload = new String(buf, StandardCharsets.UTF_8);
-        return parseHttpRequest(payload);
+        byte[] shrinkedBuffer = new byte[index];
+        System.arraycopy(buf, 0, shrinkedBuffer, 0, index);
+        String payload = new String(shrinkedBuffer, StandardCharsets.UTF_8);
+        if (payload.isEmpty())
+            return null;
+        return parseHttpRequest(payload, clientSocket);
     }
 
-    private static HttpRequest parseHttpRequest(String payload) {
+    private static HttpRequest parseHttpRequest(String payload,
+                                                Socket clientSocket) throws NumberFormatException,
+                                                                     IOException {
         HttpRequest httpRequest = new HttpRequest();
         httpRequest.setEndpoint(parseEndpoint(payload));
         httpRequest.setHttpMethod(parseHttpMethod(payload));
@@ -37,8 +43,13 @@ public class HttpParser {
             String[] payloadItemArr = payloadItem.split(":");
             if (payloadItemArr.length == 2 && !payloadItemArr[0].isEmpty())
                 httpRequest.getHeaders().put(payloadItemArr[0].trim(), payloadItemArr[1].trim());
+
         }
-        httpRequest.setBody(payloadArr[payloadArr.length - 1]);
+        String contentLength = httpRequest.getHeaders().get("Content-Length");
+        if (contentLength != null) {
+            httpRequest.setBody(new String(clientSocket.getInputStream()
+                            .readNBytes(Integer.parseInt(contentLength))));
+        }
         return httpRequest;
     }
 
