@@ -67,25 +67,20 @@ public class HttpHandler implements Runnable {
         sendResponse(CREATED);
     }
 
-    public String sendSuccessResponse(String body, HttpRequest httpRequest) throws IOException {
+    public String sendSuccessResponse(String body, HttpRequest httpRequest) {
+        System.out.println(body);
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SUCCESS);
         stringBuilder.append("Content-Type: text/plain" + NEW_LINE);
         if (httpRequest.getHeaders().get("Accept-Encoding") != null
             && httpRequest.getHeaders().get("Accept-Encoding").contains("gzip")) {
             stringBuilder.append("Content-Encoding: gzip" + NEW_LINE);
-            byte[] bodyArr = new BigInteger("1f8b08008c643b6602ff4bcbcf07002165738c03000000", 16)
-                            .toByteArray();
-            stringBuilder.append(String.format("Content-Length: %s%s%s", body.length(), NEW_LINE,
-                                               NEW_LINE));
-            sendResponse(stringBuilder.toString());
-            sendResponse(bodyArr);
-            return null;
-
-        } else {
-            stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
-                                               NEW_LINE, body));
+            body = new String(new BigInteger("1f8b08008c643b6602ff4bcbcf07002165738c03000000", 16)
+                            .toByteArray());
         }
+
+        stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
+                                           NEW_LINE, body));
         return stringBuilder.toString();
     }
 
@@ -109,10 +104,8 @@ public class HttpHandler implements Runnable {
     }
 
     public void sendResponse(String response) throws IOException {
-        if (response != null) {
-            response += NEW_LINE;
-            sendResponse(response.getBytes());
-        }
+        response += NEW_LINE;
+        sendResponse(response.getBytes());
     }
 
     public void sendResponse(byte[] message) throws IOException {
