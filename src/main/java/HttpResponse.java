@@ -16,11 +16,6 @@ public class HttpResponse {
         this.httpStatus = httpStatus;
     }
 
-    @Override
-    public String toString() {
-        return super.toString();
-    }
-
     public void setBody(String body) {
         this.body = body.getBytes();
     }

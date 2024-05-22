@@ -51,19 +51,6 @@ public class HttpHandler implements Runnable {
         sendResponse(stringBuilder.toString().getBytes(), httpResponse.getBody());
     }
 
-    public void sendResponse(String response) throws IOException {
-        if (response != null) {
-            response += HttpParser.NEW_LINE;
-            sendResponse(response.getBytes());
-        }
-    }
-
-    public void sendResponse(byte[] message) throws IOException {
-        clientSocket.getOutputStream().write(message);
-        clientSocket.getOutputStream().flush();
-
-    }
-
     public void sendResponse(byte[]... messages) throws IOException {
         for (byte[] message : messages) {
             clientSocket.getOutputStream().write(message);
