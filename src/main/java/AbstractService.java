@@ -5,7 +5,8 @@ import java.util.zip.GZIPOutputStream;
 
 public abstract class AbstractService {
 
-    abstract HttpResponse process(HttpRequest httpRequest, Socket clientSocket);
+    abstract HttpResponse process(HttpRequest httpRequest,
+                                  Socket clientSocket) throws IOException, InterruptedException;
 
     protected byte[] compressResponse(String body) {
         return compressResponse(body.getBytes());

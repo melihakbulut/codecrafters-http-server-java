@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.net.Socket;
 import java.util.Objects;
 
@@ -10,7 +11,8 @@ public class BasicService extends AbstractService {
     }
 
     @Override
-    public HttpResponse process(HttpRequest httpRequest, Socket clientSocket) {
+    public HttpResponse process(HttpRequest httpRequest, Socket clientSocket) throws IOException,
+                                                                              InterruptedException {
         HttpResponse httpResponse = new HttpResponse(HttpStatus.SUCCESS);
         httpResponse.getHeaders().put("Content-Type", "text/plain");
         String acceptEncoding = httpRequest.getHeaders().get("Accept-Encoding");

@@ -44,22 +44,12 @@ public class HttpHandler implements Runnable {
         } else if (httpRequest.getEndpoint().equals("user-agent")) {
             service = new BasicService(httpRequest.getHeaders().get("User-Agent"));
         } else if (httpRequest.getEndpoint().startsWith("files")) {
-            String fileName = httpRequest.getEndpoint().replaceAll("files/", "");
-            if (httpRequest.getHttpMethod().equals("GET")) {
-                sendFile(fileName);
-                return;
-            } else if (httpRequest.getHttpMethod().equals("POST")) {
-                saveFile(httpRequest, fileName);
-                return;
-            }
+            service = new FileService(baseDir);
         } else
             sendHttpResponse(new HttpResponse(HttpStatus.NOT_FOUND));
 
-        sendHttpResponse(service.process(httpRequest, clientSocket));
-
-    }
-
-    private void sendBasicHttpResponse(HttpResponse httpResponse) throws IOException {
+        if (service != null)
+            sendHttpResponse(service.process(httpRequest, clientSocket));
 
     }
 
