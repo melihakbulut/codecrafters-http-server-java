@@ -8,9 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class HttpResponse {
 
-    public static final String NEW_LINE = "\r\n";
-    public static final String HTTP_PREFIX = "HTTP/1.1 ";
-
     private HttpStatus httpStatus;
     private Map<String, String> headers = new HashMap<String, String>();
     private byte[] body;

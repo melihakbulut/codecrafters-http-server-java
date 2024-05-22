@@ -4,6 +4,9 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpParser {
 
+    public static final String NEW_LINE = "\r\n";
+    public static final String HTTP_PREFIX = "HTTP/1.1 ";
+
     public static HttpRequest parse(Socket clientSocket) throws IOException {
         final int bufLen = 128 * 0x400; // 4KB
         byte[] buf = new byte[bufLen];
@@ -38,7 +41,7 @@ public class HttpParser {
         HttpRequest httpRequest = new HttpRequest();
         httpRequest.setEndpoint(parseEndpoint(payload));
         httpRequest.setHttpMethod(parseHttpMethod(payload));
-        String[] payloadArr = payload.split("\r\n");
+        String[] payloadArr = payload.split(NEW_LINE);
         for (String payloadItem : payloadArr) {
             String[] payloadItemArr = payloadItem.split(":");
             if (payloadItemArr.length == 2 && !payloadItemArr[0].isEmpty())
