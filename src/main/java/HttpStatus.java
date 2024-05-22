@@ -3,7 +3,7 @@ import lombok.Getter;
 @Getter
 public enum HttpStatus {
 
-                        SUCCESS("200 OK"), CREATED("201 Created\""), NOT_FOUND("404 Not Found");
+                        SUCCESS("200 OK"), CREATED("201 Created"), NOT_FOUND("404 Not Found");
 
     private final String value;
 
