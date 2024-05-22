@@ -1,12 +1,6 @@
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
-import java.util.zip.GZIPOutputStream;
 
 public class HttpHandler implements Runnable {
 
@@ -61,68 +55,6 @@ public class HttpHandler implements Runnable {
                         .append(MessageFormat.format("{0}:{1}{2}", k, v, NEW_LINE)));
         stringBuilder.append(NEW_LINE);
         sendResponse(stringBuilder.toString().getBytes(), httpResponse.getBody());
-    }
-
-    private void saveFile(HttpRequest httpRequest, String fileName) throws IOException,
-                                                                    InterruptedException {
-        Path.of(baseDir + "/" + fileName).toFile().createNewFile();
-        Files.write(Path.of(baseDir + "/" + fileName), httpRequest.getBody().getBytes(),
-                    StandardOpenOption.WRITE);
-        sendResponse(CREATED);
-    }
-
-    public String sendSuccessResponse(String body, HttpRequest httpRequest) throws IOException {
-        System.out.println(body);
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(SUCCESS);
-        stringBuilder.append("Content-Type: text/plain" + NEW_LINE);
-        if (httpRequest.getHeaders().get("Accept-Encoding") != null
-            && httpRequest.getHeaders().get("Accept-Encoding").contains("gzip")) {
-            stringBuilder.append("Content-Encoding: gzip" + NEW_LINE);
-            byte[] bodyArr = compressResponse(body.getBytes());
-            stringBuilder.append(String.format("Content-Length: %s%s", bodyArr.length, NEW_LINE));
-
-            sendResponse(stringBuilder.toString());
-            sendResponse(bodyArr);
-            return null;
-
-        } else {
-            stringBuilder.append(String.format("Content-Length: %s%s%s%s", body.length(), NEW_LINE,
-                                               NEW_LINE, body));
-        }
-        return stringBuilder.toString();
-    }
-
-    private byte[] compressResponse(byte[] fileContents) {
-        try {
-            ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-            GZIPOutputStream gzip = new GZIPOutputStream(arrayOutputStream);
-            gzip.write(fileContents);
-            gzip.finish();
-            return arrayOutputStream.toByteArray();
-        } catch (IOException e) {
-            System.out.print("IOException: " + e.getMessage());
-            return fileContents;
-        }
-    }
-
-    public void sendFile(String fileName) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(SUCCESS);
-        stringBuilder.append("Content-Type: application/octet-stream" + NEW_LINE);
-        byte[] content = null;
-        try {
-            content = Files.readAllBytes(Path.of(baseDir + "/" + fileName));
-        } catch (NoSuchFileException e) {
-            sendResponse(NOT_FOUND);
-            return;
-        }
-
-        stringBuilder.append(String.format("Content-Length: %s%s", content.length, NEW_LINE));
-        stringBuilder.toString();
-
-        sendResponse(stringBuilder.toString());
-        sendResponse(content);
     }
 
     public void sendResponse(String response) throws IOException {
