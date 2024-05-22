@@ -31,7 +31,7 @@ public class FileService extends AbstractService {
         Path.of(baseDir + "/" + fileName).toFile().createNewFile();
         Files.write(Path.of(baseDir + "/" + fileName), httpRequest.getBody().getBytes(),
                     StandardOpenOption.WRITE);
-        return new HttpResponse(HttpStatus.SUCCESS);
+        return new HttpResponse(HttpStatus.CREATED);
     }
 
     public HttpResponse sendFile(String fileName) throws IOException {
